@@ -1,0 +1,10 @@
+google-genai
+python-dotenv
+flask
+flask-cors
+pdfplumber
+python-docx
+pandas
+Pillow
+docling
+openpyxl

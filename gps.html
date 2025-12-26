@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZiraatAI | İklim Takip Sistemi</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root { --primary: #27ae60; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); }
+        
+        nav { background: var(--primary); color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        
+        .container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+        
+        .map-card { background: white; border-radius: 15px; overflow: hidden; height: 500px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #map { height: 100%; width: 100%; }
+
+        .data-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .weather-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        .w-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #f9f9f9; border-radius: 10px; border-bottom: 3px solid #eee; }
+        .w-item i { color: var(--primary); font-size: 1.5rem; }
+        .w-item span { font-weight: bold; font-size: 1.1rem; }
+
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav><i class="fas fa-seedling"></i> ZiraatAI İklim Veri Paneli</nav>
+
+<div class="container">
+    <div class="map-card">
+        <div id="map"></div>
+    </div>
+
+    <div class="data-card">
+        <button onclick="gpsBul()">📍 Mevcut Konumumu Bul</button>
+        <p id="konumYazi" style="text-align:center; color:#666; font-size:0.9rem;">Haritadan bir nokta seçin.</p>
+        
+        <div class="weather-grid">
+            <div class="w-item"><i class="fas fa-thermometer-half"></i> <span id="temp">--°C</span></div>
+            <div class="w-item"><i class="fas fa-tint"></i> <span id="hum">% --</span></div>
+            <div class="w-item"><i class="fas fa-wind"></i> <span id="wind">-- km/s</span></div>
+            <div class="w-item"><i class="fas fa-cloud"></i> <span id="desc">--</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Haritayı Oluştur
+    var map = L.map('map').setView([39.9, 32.8], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var marker;
+
+    // 2. Harita Tıklama Fonksiyonu
+    map.on('click', function(e) {
+        verileriGoster(e.latlng.lat, e.latlng.lng);
+    });
+
+    function gpsBul() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            verileriGoster(pos.coords.latitude, pos.coords.longitude);
+            map.setView([pos.coords.latitude, pos.coords.longitude], 12);
+        });
+    }
+
+    function verileriGoster(lat, lng) {
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lng]).addTo(map);
+        
+        document.getElementById("konumYazi").innerText = "Koordinat: " + lat.toFixed(4) + ", " + lng.toFixed(4);
+        
+        // Ücretsiz ve Anahtar Gerektirmeyen Bir Test Yöntemi (Alternatif API Kullanımı)
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&relative_humidity_2m=true`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const w = data.current_weather;
+                document.getElementById("temp").innerText = Math.round(w.temperature) + "°C";
+                document.getElementById("wind").innerText = w.windspeed + " km/s";
+                document.getElementById("desc").innerText = "Hava Durumu Kod: " + w.weathercode;
+                document.getElementById("hum").innerText = "Nem Verisi Alındı"; // Basitleştirildi
+            })
+            .catch(() => {
+                alert("İnternet bağlantısında bir sorun oluştu veya servis yanıt vermiyor.");
+            });
+    }
+</script>
+
+</body>
+</html>

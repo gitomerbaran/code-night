@@ -64,28 +64,47 @@ const ResultDisplay = ({ result, loading, error }) => {
       <div className="space-y-6">
         {/* Primary Crop - Premium Card */}
         {result.primary_crop && (
-          <div className="premium-card border-2 border-blue-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-blue-900 uppercase tracking-wider">
-                Önerilen Ürün
-              </h3>
+          <div className="premium-card border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider">
+                  Ana Öneri
+                </h3>
+              </div>
               {result.confidence && (
-                <span className="badge badge-primary font-semibold">{result.confidence}% Güven</span>
+                <span className="badge badge-primary font-semibold text-xs px-3 py-1">{result.confidence}% Güven</span>
               )}
             </div>
-            <p className="text-3xl font-bold text-gray-900 mb-4">{result.primary_crop}</p>
+            <div className="mb-4">
+              <p className="text-3xl font-bold text-gray-900 mb-2">{result.primary_crop}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Verdiğiniz toprak analizi ve iklim koşullarına göre en uygun ürün önerisidir.
+              </p>
+            </div>
             {result.confidence && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-gray-600">
-                  <span>Güven Oranı</span>
-                  <span className="font-semibold">{result.confidence}%</span>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-700 font-medium">Öneri Güven Oranı</span>
+                  <span className="font-bold text-gray-900">{result.confidence}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                <div className="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden shadow-inner">
                   <div 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-3 rounded-full transition-all duration-500 shadow-sm"
+                    className={`h-3.5 rounded-full transition-all duration-500 shadow-sm ${
+                      result.confidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                      result.confidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                      'bg-gradient-to-r from-yellow-500 to-amber-500'
+                    }`}
                     style={{ width: `${result.confidence}%` }}
                   ></div>
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {result.confidence >= 80 ? 'Yüksek güvenilirlik - Öneri güçlü' :
+                   result.confidence >= 60 ? 'Orta güvenilirlik - Öneri makul' :
+                   'Düşük güvenilirlik - Daha fazla veri önerilir'}
+                </p>
               </div>
             )}
           </div>
@@ -93,21 +112,29 @@ const ResultDisplay = ({ result, loading, error }) => {
 
         {/* Alternatives */}
         {result.alternatives && result.alternatives.length > 0 && (
-          <div>
+          <div className="bg-indigo-50/50 rounded-lg p-4 border border-indigo-100">
             <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
-              Alternatif Ürünler
+              Alternatif Ürün Seçenekleri
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+              Ana öneriye ek olarak, aşağıdaki ürünler de toprak ve iklim koşullarınıza uygun olabilir:
+            </p>
+            <div className="flex flex-wrap gap-2.5">
               {result.alternatives.map((alt, idx) => (
-                <span 
+                <div 
                   key={idx}
-                  className="badge badge-info"
+                  className="bg-white border border-indigo-200 rounded-lg px-4 py-2.5 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  {alt}
-                </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full w-5 h-5 flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <span className="text-sm font-medium text-gray-800">{alt}</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -115,64 +142,112 @@ const ResultDisplay = ({ result, loading, error }) => {
 
         {/* Reasons */}
         {result.reasons && result.reasons.length > 0 && (
-          <div>
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-5 border border-blue-200 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              Öneri Gerekçeleri
+              Neden Bu Ürün Öneriliyor?
             </h3>
-            <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
-              <ul className="space-y-2.5">
-                {result.reasons.map((reason, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="leading-relaxed">{reason}</span>
-                  </li>
-                ))}
-              </ul>
+            <p className="text-xs text-gray-600 mb-4 leading-relaxed">
+              Bu öneri, toprak analizi sonuçlarınız, iklim koşullarınız ve belirttiğiniz hedeflere göre yapılmıştır:
+            </p>
+            <div className="space-y-3">
+              {result.reasons.map((reason, idx) => (
+                <div key={idx} className="bg-white rounded-lg p-3.5 border border-blue-100 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-bold text-blue-700">{idx + 1}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed flex-1">{reason}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Risks */}
         {result.risks && result.risks.length > 0 && (
-          <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-amber-900 mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-amber-500 rounded-lg p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              Dikkat Edilmesi Gerekenler
-            </h3>
-            <ul className="space-y-2">
+              <h3 className="text-sm font-semibold text-amber-900">
+                ⚠️ Dikkat Edilmesi Gerekenler
+              </h3>
+            </div>
+            <p className="text-xs text-amber-800 mb-4 leading-relaxed bg-amber-100/50 rounded p-2.5 border border-amber-200">
+              Bu ürünü yetiştirirken aşağıdaki konulara özellikle dikkat etmeniz önerilir:
+            </p>
+            <div className="space-y-2.5">
               {result.risks.map((risk, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-sm text-amber-900">
-                  <span className="text-amber-600 mt-0.5 font-bold">•</span>
-                  <span className="leading-relaxed">{risk}</span>
-                </li>
+                <div key={idx} className="bg-white/70 rounded-lg p-3 border border-amber-200">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-sm text-amber-900 leading-relaxed flex-1">{risk}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         {/* Quick Actions */}
         {result.quick_actions && result.quick_actions.length > 0 && (
-          <div className="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-emerald-900 mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-l-4 border-emerald-500 rounded-lg p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
-              Önerilen Aksiyonlar
-            </h3>
-            <ul className="space-y-2">
+              <h3 className="text-sm font-semibold text-emerald-900">
+                ✅ Önerilen Aksiyonlar
+              </h3>
+            </div>
+            <p className="text-xs text-emerald-800 mb-4 leading-relaxed bg-emerald-100/50 rounded p-2.5 border border-emerald-200">
+              Başarılı bir üretim için aşağıdaki adımları takip etmeniz önerilir:
+            </p>
+            <div className="space-y-2.5">
               {result.quick_actions.map((action, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-sm text-emerald-900">
-                  <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="leading-relaxed">{action}</span>
+                <div key={idx} className="bg-white/70 rounded-lg p-3.5 border border-emerald-200 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-emerald-700" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="text-sm text-emerald-900 leading-relaxed flex-1 font-medium">{action}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Assumptions */}
+        {result.assumptions && result.assumptions.length > 0 && (
+          <div className="bg-purple-50/50 border-l-4 border-purple-400 rounded-lg p-4 shadow-sm">
+            <h3 className="text-xs font-semibold text-purple-800 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Yapılan Varsayımlar
+            </h3>
+            <p className="text-xs text-purple-700 mb-2 leading-relaxed">
+              Eksik veriler nedeniyle aşağıdaki varsayımlar yapılmıştır:
+            </p>
+            <ul className="space-y-1.5">
+              {result.assumptions.map((assumption, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-xs text-purple-700">
+                  <span className="text-purple-500 mt-0.5">•</span>
+                  <span className="leading-relaxed">{assumption}</span>
                 </li>
               ))}
             </ul>
@@ -184,14 +259,23 @@ const ResultDisplay = ({ result, loading, error }) => {
           <div className="bg-slate-50 border-l-4 border-slate-400 rounded-lg p-4 shadow-sm">
             <h3 className="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-2">
               <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Eksik Bilgiler
+              Daha İyi Sonuç İçin Eksik Bilgiler
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Daha doğru öneri için şu bilgileri ekleyebilirsiniz: <span className="font-medium">{result.missing_inputs.slice(0, 5).join(', ')}</span>
-              {result.missing_inputs.length > 5 && '...'}
+            <p className="text-xs text-slate-600 mb-2 leading-relaxed">
+              Daha doğru öneriler için aşağıdaki bilgileri ekleyebilirsiniz:
             </p>
+            <div className="flex flex-wrap gap-1.5">
+              {result.missing_inputs.slice(0, 8).map((input, idx) => (
+                <span key={idx} className="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                  {input}
+                </span>
+              ))}
+              {result.missing_inputs.length > 8 && (
+                <span className="text-xs text-slate-500 px-2.5 py-1">+{result.missing_inputs.length - 8} daha</span>
+              )}
+            </div>
           </div>
         )}
       </div>

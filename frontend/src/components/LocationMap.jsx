@@ -77,6 +77,11 @@ const LocationMap = ({ onLocationSelect, initialLat, initialLon }) => {
 
     const initMap = () => {
         if (!window.L || !mapRef.current) return;
+        
+        // Harita zaten başlatılmışsa tekrar başlatma
+        if (mapInstanceRef.current) {
+            return;
+        }
 
         try {
             const defaultCenter = initialLat && initialLon
